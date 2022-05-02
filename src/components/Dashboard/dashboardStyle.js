@@ -250,6 +250,7 @@ export const TopListItem = styled.div`
     height: 120px;
     background-color: ${(props) => props.theme.ntBlack};
     background-image: url(${(props) => props.bga});
+    background-size: cover;
     /* background-image: url("https://occ-0-1168-300.1.nflxso.net/dnm/api/v6/X194eJsgWBDE2aQbaNdmCXGUP-Y/AAAABarkEcdb4mYWyTF0dLM8mQ1ZWqNZQdI3R0sipsIJbduACAoLb13BC0i2zmt8pg-G_BAx_YQIaH9s6pvr25natJict8w.jpg?r=539"); */
     border-radius: 5px;
     box-sizing: border-box;
@@ -489,36 +490,44 @@ export const LoadingWrapper = styled.div`
 
 export const MovieList = styled.div`
   display: flex;
+  flex-direction:column ;
   width: calc(100% - 100px);
   height: auto;
   background-color: transparent;
   margin-top: 30px;
   position: relative;
-  margin-bottom: 300px;
+  margin-bottom: 50px;
   padding-left: 50px;
   padding-right: 50px;
 
+  h3{
+    color: #fff;
+    margin-bottom: 10px;
+  }
   .movie-wrapper {
     width: 100%;
     display: flex;
     flex-wrap: wrap;
-    gap: 1%;
+    gap: 25px;
 
     .movie {
-      width: 24%;
-      height: auto;
+      width: 48%;
+      height: 150px;
       border-radius: 6px;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
+      overflow: hidden;
 
       @media ${devices.mobile} {
         width: 100%;
+        flex-direction: column;
+        height: auto;
       }
 
       .movie-avatar {
         width: 100%;
-        height: 200px;
-        background-color: blue;
+        height: 150px;
+        background-color: #eee;
 
         img {
           width: 100%;
@@ -528,21 +537,38 @@ export const MovieList = styled.div`
 
       .movie-details {
         width: calc(100% - 40px);
-        height: auto;
+        height: 150px;
         background-color: #181818;
         color: #fff;
-        padding: 20px;
+        padding: 10px;
+
+        @media ${devices.mobile} {
+           width: 100%;
+          }
 
         .title {
           font-weight: bold;
           font-size: 20px;
           margin-bottom: 10px;
+
+          small {
+            font-size: 12px;
+          }
         }
 
         .desc {
           line-height: 1.5;
           margin-bottom: 10px;
           font-size: 14px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 4;
+          -webkit-box-orient: vertical;
+
+          @media ${devices.mobile} {
+            margin-bottom: 2px;
+          }
         }
       }
     }

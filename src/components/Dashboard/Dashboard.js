@@ -1,11 +1,15 @@
 import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchAsyncMovies } from "../../features/movies/movieThunk";
+import {
+  fetchAsyncMovies,
+  fetchAsyncShows,
+} from "../../features/movies/movieThunk";
 import { getAllMovies } from "../../features/movies/movieSlice";
 import { ThemeProvider } from "styled-components";
 
 import Header from "../Header/Header";
 import TopList from "./TopList";
+import Shows from "./Shows";
 
 import { theme } from "../../utils/theme";
 import {
@@ -24,13 +28,9 @@ import {
   MdOutlineClose,
 } from "react-icons/md";
 
-const data = {
-  herobg:
-    "https://occ-0-1168-300.1.nflxso.net/dnm/api/v6/6AYY37jfdO6hpXcMjf9Yu5cnmO0/AAAABYlOFbyCzTYd5A-DlKrcPhnl2zkwcUsNjNjLRVxA9mrakPFOkCEn6qIO3Z2hocHVHRL3ybnAJtQqumye9cz9MuVm3RJ-.jpg?r=10a",
-};
-
 const Dashboard = () => {
   const dispatch = useDispatch();
+
   const [tmSlideIndex, setTmSlideIndex] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [modalData, setModalData] = useState({});
@@ -41,15 +41,14 @@ const Dashboard = () => {
 
   useEffect(() => {
     dispatch(fetchAsyncMovies());
-    return () => {
-      dispatch(fetchAsyncMovies());
-    };
+    dispatch(fetchAsyncShows());
   }, [dispatch]);
 
   const movies = useSelector(getAllMovies);
 
+
   const handleTmClick = (direction) => {
-    const tt = (movies.Search.length - 1) / 2;
+    const tt = (movies.results.length - 1) / 2;
     if (direction === "left") {
       setTmSlideIndex(tmSlideIndex > 0 ? tmSlideIndex - 1 : tt);
     } else {
@@ -57,30 +56,24 @@ const Dashboard = () => {
     }
   };
 
-  const handleMovieModal = (e) =>{
-    console.log("modal dashboard",e);
-    if(showModal){
+  const handleMovieModal = (e) => {
+    if (showModal) {
       setModalData({});
       setShowModal(false);
-    }
-    else{
+    } else {
       setModalData(e);
       setShowModal(true);
     }
-    
-  }
+  };
   return (
     <ThemeProvider theme={theme}>
       <Wrapper>
-        {theLoader && (
-          <LoadingWrapper>
-            <div>
-              <p>Loading...</p>
-            </div>
-          </LoadingWrapper>
-        )}
         {showModal && (
-          <MovieModal modalImg={modalData.Poster}>
+          <MovieModal
+            modalImg={
+              "https://image.tmdb.org/t/p/original" + modalData.backdrop_path
+            }
+          >
             <div className="modal-bg">
               <div className="player-wrapper">
                 <div className="player-overlay">
@@ -90,7 +83,7 @@ const Dashboard = () => {
                     </div>
                   </div>
                   <div className="title">
-                    <p>{modalData.Title}</p>
+                    <p>{modalData.original_title || modalData.original_name  }</p>
                     <button>
                       <MdOutlinePlayCircleOutline />
                       <span>Play</span>
@@ -100,18 +93,14 @@ const Dashboard = () => {
               </div>
               <div className="details-wrapper">
                 <div className="details">
-                  <p>
-                    {modalData.Year}
-                  </p>
+                  <p>{modalData.overview}</p>
                 </div>
-                <div className="cast">
-                  {/* <p>Cast</p> */}
-                </div>
+                <div className="cast">{/* <p>Cast</p> */}</div>
               </div>
             </div>
           </MovieModal>
         )}
-        {apiError ? (
+        {apiError || theLoader ? (
           <LoadingWrapper>
             <div>
               <p>{apiErrorMessage}</p>
@@ -120,33 +109,34 @@ const Dashboard = () => {
         ) : (
           <Fragment>
             <Header></Header>
-            <StyledD heroimg={data.herobg}>
-              <div className="hero-wrapper">
-                <div className="hero-image">
-                  <div className="hero-overlay">
-                    <div className="title">
-                      <p className="bt">The Walking Dead</p>
-                      <p className="ds">
-                        In the wake of a zombie apocalypse, survivors hold on to
-                        the hope of humanity by banding together to wage a fight
-                        for their own survival.
-                      </p>
-                      <div className="btn">
-                        <button>
-                          <MdOutlinePlayCircleOutline /> Play
-                        </button>
-                        <button>More Info</button>
+            {movies.results && (
+              <StyledD
+                heroimg={
+                  "https://image.tmdb.org/t/p/original" +
+                  movies.results[0].backdrop_path
+                }
+              >
+                <div className="hero-wrapper">
+                  <div className="hero-image">
+                    <div className="hero-overlay">
+                      <div className="title">
+                        <p className="bt">{movies.results[0].original_title}</p>
+                        <p className="ds">{movies.results[0].overview}</p>
+                        <div className="btn">
+                          <button>
+                            <MdOutlinePlayCircleOutline /> Play
+                          </button>
+                          <button>More Info</button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </StyledD>
+              </StyledD>
+            )}
             <ListStart tmSliderIndex={tmSlideIndex}>
               <div className="top-list">
-                <div className="title">
-                  Top Movies
-                </div>
+                <div className="title">Top Movies</div>
                 <div className="items">
                   <div
                     className="left-move"
@@ -156,7 +146,10 @@ const Dashboard = () => {
                   </div>
                   <div className="cols-wrapper">
                     <div className="cols">
-                      <TopList data={movies.Search} onModalClick={handleMovieModal}></TopList>
+                      <TopList
+                        data={movies.results}
+                        onModalClick={handleMovieModal}
+                      ></TopList>
                     </div>
                   </div>
                   <div
@@ -170,32 +163,41 @@ const Dashboard = () => {
             </ListStart>
 
             <MovieList>
-              <div className="movie-wrapper">
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => (
-                  <div className="movie" key={item}>
-                    <div className="movie-avatar">
-                      <img
-                        src="https://occ-0-1168-300.1.nflxso.net/dnm/api/v6/X194eJsgWBDE2aQbaNdmCXGUP-Y/AAAABarkEcdb4mYWyTF0dLM8mQ1ZWqNZQdI3R0sipsIJbduACAoLb13BC0i2zmt8pg-G_BAx_YQIaH9s6pvr25natJict8w.jpg?r=539"
-                        alt="m"
-                      />
-                    </div>
-                    <div className="movie-details">
-                      <div className="title">Movie Title</div>
-                      <div className="desc">
-                        <p>
-                          In disguise as her friend, Ha-ri shows up to a blind
-                          date to scare him away. But plans go awry when he
-                          turns out to be her CEO — and makes a proposal.
-                        </p>
-                      </div>
-                      <div className="year">
-                        <p>2022</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
+              <h3>Trending Now</h3>
+              {movies && (
+                <div className="movie-wrapper">
+                  {movies.results.map(
+                    (item, index) =>
+                      (index > 3 && index < 8) && (
+                        <div
+                          className="movie"
+                          key={index}
+                          onClick={() => handleMovieModal(item)}
+                        >
+                          <div className="movie-avatar">
+                            <img
+                              src={
+                                "https://image.tmdb.org/t/p/original" +
+                                item.backdrop_path
+                              }
+                              alt=""
+                            />
+                          </div>
+                          <div className="movie-details">
+                            <div className="title">
+                              {item.original_title}{" "}
+                              <small>({item.vote_average})</small>
+                            </div>
+                            <div className="desc">{item.overview}</div>
+                          </div>
+                        </div>
+                      )
+                  )}
+                </div>
+              )}
             </MovieList>
+
+            <Shows  onModalClick={handleMovieModal}></Shows>
           </Fragment>
         )}
       </Wrapper>

@@ -19,10 +19,11 @@ const TopList = (props) => {
       <div className="cols">
         {!theLoader &&
           data.map((item, index) => (
-            <TopListItem bga={item.Poster} key={index} >
+            
+            <TopListItem bga={'https://image.tmdb.org/t/p/original'+item.backdrop_path} key={index} >
               <div className="item" onClick={() => handleModal(item)}>
                 <div className="overlay">
-                  <span>{item.Title}</span>
+                  <span>{item.original_title}</span>
                 </div>
               </div>
             </TopListItem>

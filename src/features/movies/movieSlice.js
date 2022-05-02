@@ -1,11 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { fetchAsyncMovies } from "./movieThunk";
+import { fetchAsyncMovies, fetchAsyncShows } from "./movieThunk";
 
 const initialState = {
   movies: {},
+  shows: {},
   loading: true,
   apiError: false,
-  apiErrorMessage: ""
+  apiErrorMessage: "Loading...",
 };
 
 export const movieSlice = createSlice({
@@ -14,18 +15,41 @@ export const movieSlice = createSlice({
   reducers: {},
   extraReducers: {
     [fetchAsyncMovies.pending]: () => {
-      console.log("Pending");
+      console.log("MoviePending");
     },
     [fetchAsyncMovies.fulfilled]: (state, { payload }) => {
-      console.log("Fetched Successfully!");
+      console.log("MovieFetched Successfully!");
       return { ...state, movies: payload, loading: false };
     },
     [fetchAsyncMovies.rejected]: (state) => {
-      console.log("Rejected!");
-      return { ...state, loading: false, apiError: true, apiErrorMessage: "Connection Failed, Refresh Page" };
+      console.log("MovieRejected!");
+      return {
+        ...state,
+        loading: false,
+        apiError: true,
+        apiErrorMessage: "Connection Failed, Refresh Page",
+      };
+    },
+    [fetchAsyncShows.pending]: () => {
+      console.log("ShowsPending");
+    },
+    [fetchAsyncShows.fulfilled]: (state, { payload }) => {
+      console.log("ShowFetch");
+
+      return { ...state, shows: payload, loading: false };
+    },
+    [fetchAsyncShows.rejected]: (state) => {
+      console.log("ShowsRejected!");
+      return {
+        ...state,
+        loading: false,
+        apiError: true,
+        apiErrorMessage: "Connection Failed, Refresh Page",
+      };
     },
   },
 });
 
 export const getAllMovies = (state) => state.movies.movies;
+export const getAllShows = (state) => state.movies.shows;
 export default movieSlice.reducer;
