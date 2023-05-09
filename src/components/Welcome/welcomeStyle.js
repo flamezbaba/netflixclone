@@ -56,6 +56,7 @@ export const StyledW = styled.div`
         flex-direction: column;
         justify-content: center;
         width: 150px;
+        transition: all 5s ease-in ;
 
         &:hover {
           img {
